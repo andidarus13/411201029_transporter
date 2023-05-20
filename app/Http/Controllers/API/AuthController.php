@@ -5,7 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Symfony\Component\Mime\Email;
 use Validator;
+use Auth;
 
 class AuthController extends Controller
 {
@@ -38,5 +40,27 @@ class AuthController extends Controller
             'data' => $success
         ]);
 
+    }
+
+    public function login(Request $request)
+    {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            $auth = Auth::user();
+            $success['token'] = $auth->createToken('auth_token')->plainTextToken;
+            $success['name'] = $auth->name;
+            $success['email'] = $auth->email;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login Berhasil',
+                'data' => $success
+            ]);
+        }else {
+            return response()->json([
+                'success' => true,
+                'message' => 'Silahkan Cek Email dan Password',
+                'data' => null
+            ]);
+        }
     }
 }
